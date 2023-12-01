@@ -59,7 +59,7 @@ def part2(input_data: str):
     strings_to_look_for = list('0123456789') + list(digit_mapping)
 
     def get_first_match(line: str, reverse: bool) -> str:
-        """Get the first occurrence of any string in the digit mapping, and convert it to a (string representation of a) digit."""
+        """Get the first occurrence of any string in the strings_to_look_for, and convert it to a (string representation of a) digit if needed."""
         for suffix in suffixes(line, reverse=reverse):
             for string_to_look_for in strings_to_look_for:
                 if suffix.startswith(string_to_look_for):
