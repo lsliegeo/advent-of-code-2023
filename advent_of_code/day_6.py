@@ -16,12 +16,21 @@ def part1(input_data: str):
 
 
 def part2(input_data: str):
-    pass
+    duration = int(input_data.splitlines()[0].split(':')[1].replace(' ', ''))
+    distance_to_beat = int(input_data.splitlines()[1].split(':')[1].replace(' ', ''))
+
+    result = 0
+    for i in range(1, duration):
+        if i * (duration - i) > distance_to_beat:
+            result += 1
+
+    return result
 
 
 if __name__ == '__main__':
     assert part1(EXAMPLE) == 288
     print(f'Solution for part 1 is: {part1(get_input())}')
 
-    assert part2(EXAMPLE) == None
+    assert part2(EXAMPLE) == 71503
+    # takes ~13 sec
     print(f'Solution for part 2 is: {part2(get_input())}')
