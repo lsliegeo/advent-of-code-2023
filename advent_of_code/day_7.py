@@ -33,17 +33,25 @@ class Card(Enum):
             char = 'C' + char
         return Card[char]
 
-    @staticmethod
-    def compare_string(card: Card) -> str:
-        return f'{card.value:02}'
+
+def compare_string_part_1(card: Card) -> str:
+    value = card.value
+    return f'{value:02}'
+
+
+def compare_string_part_2(card: Card) -> str:
+    value = card.value
+    if card == Card.J:
+        value = 1
+    return f'{value:02}'
 
 
 def parse_hand(hand_str: str) -> tuple[Card]:
     return tuple(Card.from_char(char) for char in hand_str)
 
 
-def hand_score(cards: tuple[Enum]) -> tuple:
-    hand_str = ''.join([Card.compare_string(c) for c in cards])
+def hand_score_1(cards: tuple[Card]) -> tuple:
+    hand_str = ''.join([compare_string_part_1(c) for c in cards])
     value_to_count = defaultdict(int)
     for card in cards:
         value_to_count[card.value] += 1
@@ -51,24 +59,61 @@ def hand_score(cards: tuple[Enum]) -> tuple:
     for value, count in value_to_count.items():
         count_to_values[count].append(value)
 
-    if 5 in count_to_values:
+    if count_to_values[5]:
         return 5, hand_str
-    elif 4 in count_to_values:
+    elif count_to_values[4]:
         return 4, hand_str
-    elif 3 in count_to_values:
-        if 2 in count_to_values:
+    elif count_to_values[3]:
+        if count_to_values[2]:
             # 3 + 2
             return 3, 2, hand_str
         else:
             # 3 + 1 + 1
-            return 3, 1, 1, hand_str
-    elif 2 in count_to_values:
+            return 3, 1, hand_str
+    elif count_to_values[2]:
         if len(count_to_values[2]) == 2:
             # 2 + 2 + 1
-            return 2, 2, 1, hand_str
+            return 2, 2, hand_str
         else:
             # 2 + 1 + 1 + 1
-            return 2, 1, 1, 1, hand_str
+            return 2, 1, hand_str
+    else:
+        return 1, hand_str
+
+
+def hand_score_2(cards: tuple[Card]) -> tuple:
+    hand_str = ''.join([compare_string_part_2(c) for c in cards])
+    value_to_count = defaultdict(int)
+    most_frequent_non_joker = max([c for c in cards if c != Card.J], key=lambda c: cards.count(c), default=None)
+    if most_frequent_non_joker is None:
+        most_frequent_non_joker = Card.J
+    for card in cards:
+        if card == Card.J:
+            value_to_count[most_frequent_non_joker.value] += 1
+        else:
+            value_to_count[card.value] += 1
+    count_to_values = defaultdict(list)
+    for value, count in value_to_count.items():
+        count_to_values[count].append(value)
+
+    if count_to_values[5]:
+        return 5, hand_str
+    elif count_to_values[4]:
+        return 4, hand_str
+    elif count_to_values[3]:
+        if count_to_values[2]:
+            # 3 + 2
+            return 3, 2, hand_str
+        else:
+            # 3 + 1 + 1
+            return 3, 1, hand_str
+    elif count_to_values[2]:
+        if len(count_to_values[2]) == 2:
+            # 2 + 2 + 1
+            return 2, 2, hand_str
+        else:
+            # 2 + 1 + 1 + 1
+            return 2, 1, hand_str
     else:
         return 1, hand_str
 
@@ -80,23 +125,32 @@ def part1(input_data: str):
     }
 
     result = 0
-    for i, hand in enumerate(sorted(hand_to_bet, key=hand_score)):
+    for i, hand in enumerate(sorted(hand_to_bet, key=hand_score_1)):
         result += (i + 1) * hand_to_bet[hand]
     return result
 
 
 def part2(input_data: str):
-    pass
+    hand_to_bet = {
+        parse_hand(line.split()[0]): int(line.split()[1])
+        for line in input_data.splitlines()
+    }
+
+    result = 0
+    for i, hand in enumerate(sorted(hand_to_bet, key=hand_score_2)):
+        result += (i + 1) * hand_to_bet[hand]
+    return result
 
 
 if __name__ == '__main__':
-    assert hand_score(parse_hand('33332')) > hand_score(parse_hand('2AAAA'))
-    assert hand_score(parse_hand('77888')) > hand_score(parse_hand('77788'))
-    assert hand_score(parse_hand('KK677')) > hand_score(parse_hand('KTJJT'))
-    assert hand_score(parse_hand('32456')) > hand_score(parse_hand('2345K'))
-
+    assert hand_score_1(parse_hand('33332')) > hand_score_1(parse_hand('2AAAA'))
+    assert hand_score_1(parse_hand('77888')) > hand_score_1(parse_hand('77788'))
+    assert hand_score_1(parse_hand('KK677')) > hand_score_1(parse_hand('KTJJT'))
+    assert hand_score_1(parse_hand('32456')) > hand_score_1(parse_hand('2345K'))
     assert part1(EXAMPLE) == 6440
     print(f'Solution for part 1 is: {part1(get_input())}')
 
-    assert part2(EXAMPLE) == None
+    assert hand_score_2(parse_hand('QQQQ2')) > hand_score_2(parse_hand('JKKK2'))
+    assert hand_score_2(parse_hand('KK8AJ'))[:-1] == (3, 1)
+    assert part2(EXAMPLE) == 5905
     print(f'Solution for part 2 is: {part2(get_input())}')
