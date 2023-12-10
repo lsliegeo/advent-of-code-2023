@@ -15,6 +15,28 @@ class Direction(Enum):
     SOUTH_EAST = 'south_east'
     SOUTH_WEST = 'south_west'
 
+    @staticmethod
+    def orthogonal_directions() -> list[Direction]:
+        return [
+            Direction.NORTH,
+            Direction.SOUTH,
+            Direction.EAST,
+            Direction.WEST,
+        ]
+
+    @staticmethod
+    def opposite(direction: Direction) -> Direction:
+        return {
+            Direction.NORTH: Direction.SOUTH,
+            Direction.SOUTH: Direction.NORTH,
+            Direction.WEST: Direction.EAST,
+            Direction.EAST: Direction.WEST,
+            Direction.NORTH_EAST: Direction.SOUTH_WEST,
+            Direction.SOUTH_WEST: Direction.NORTH_EAST,
+            Direction.NORTH_WEST: Direction.SOUTH_EAST,
+            Direction.SOUTH_EAST: Direction.NORTH_WEST,
+        }[direction]
+
 
 @dataclasses.dataclass(frozen=True)
 class Coordinate:
@@ -34,6 +56,7 @@ class Coordinate:
         return f'({self.x}, {self.y})'
 
     def step(self, direction: Direction):
+        assert isinstance(direction, Direction)
         match direction:
             case Direction.NORTH | Direction.NORTH_EAST | Direction.NORTH_WEST:
                 x_diff = -1
@@ -50,8 +73,9 @@ class Coordinate:
                 y_diff = 0
         return Coordinate(self.x + x_diff, self.y + y_diff)
 
-    def neighbours(self) -> list[Coordinate]:
-        return [self.step(direction) for direction in Direction]
+    def neighbours(self, diagonal: bool) -> dict[Direction, Coordinate]:
+        directions = list(Direction) if diagonal else Direction.orthogonal_directions()
+        return {direction: self.step(direction) for direction in directions}
 
 
 @dataclasses.dataclass

@@ -46,7 +46,7 @@ def number_neighbours(co: Coordinate, number: int) -> set[Coordinate]:
     """All neighbouring coordinates of a number and its start coordinate."""
     neighbours = []
     for _ in range(len(str(number))):
-        neighbours += co.neighbours()
+        neighbours += co.neighbours(diagonal=True).values()
         co = co.step(Direction.EAST)
     return set(neighbours)
 
