@@ -68,7 +68,7 @@ CHAR_TO_DIRECTIONS: dict[str, tuple[Direction, Direction]] = {
 
 
 def coordinate_to_two_neighbours(grid: Grid, coordinate: Coordinate) -> tuple[Coordinate, Coordinate]:
-    a, b = CHAR_TO_DIRECTIONS[grid.items[coordinate]]
+    a, b = CHAR_TO_DIRECTIONS[grid[coordinate]]
     return coordinate.step(a), coordinate.step(b)
 
 
@@ -80,21 +80,20 @@ def parse_grid(input_data: str) -> tuple[Grid, Coordinate]:
             if char == 'S':
                 start = Coordinate(x, y)
             elif char != '.':
-                grid.items[Coordinate(x, y)] = char
+                grid[Coordinate(x, y)] = char
 
     # We still need to find the correct character for the start
     directions_around_start_that_match = [
         direction
         for direction, neighbour_co in start.neighbours(diagonal=False).items()
-        if neighbour_co in grid.items
-           and start in coordinate_to_two_neighbours(grid, neighbour_co)
+        if neighbour_co in grid and start in coordinate_to_two_neighbours(grid, neighbour_co)
     ]
     start_char = next(iter(
         char for
         char, directions in CHAR_TO_DIRECTIONS.items()
         if sorted(directions_around_start_that_match, key=lambda d: d.name) == sorted(directions, key=lambda d: d.name)
     ))
-    grid.items[start] = start_char
+    grid[start] = start_char
 
     return grid, start
 
@@ -129,10 +128,10 @@ def part2(input_data: str):
         inside = False
         on_a_line = False
         line_started_up = False
-        max_relevant_y = max([co.y for co in grid.items if co.x == x], default=0)
+        max_relevant_y = max([co.y for co in grid if co.x == x], default=0)
         for y in range(0, max_relevant_y):
             current_coordinate = Coordinate(x, y)
-            current_char = grid.items.get(current_coordinate) if current_coordinate in border_positions else None
+            current_char = grid.get(current_coordinate) if current_coordinate in border_positions else None
 
             match current_char:
                 case None:
@@ -158,7 +157,7 @@ def part2(input_data: str):
     number_inside_using_regex = 0
     lines = [
         ''.join([
-            grid.items[Coordinate(x, y)] if Coordinate(x, y) in border_positions else '.'
+            grid[Coordinate(x, y)] if Coordinate(x, y) in border_positions else '.'
             for y in range(grid.max_y + 1)
         ])
         for x in range(grid.max_x + 1)

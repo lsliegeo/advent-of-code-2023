@@ -19,7 +19,7 @@ def parse_grid(grid_str: str) -> tuple[Grid, Grid]:
     for x, line in enumerate(grid_str.splitlines()):
         for y, char in enumerate(line):
             if char != '.' and not char.isdigit():
-                symbols.items[Coordinate(x, y)] = char
+                symbols[Coordinate(x, y)] = char
     numbers = Grid()
 
     for x, line in enumerate(grid_str.splitlines()):
@@ -36,7 +36,7 @@ def parse_grid(grid_str: str) -> tuple[Grid, Grid]:
             else:
                 if number_str is not None:
                     # End the previous number
-                    numbers.items[Coordinate(x, number_start_y)] = int(number_str)
+                    numbers[Coordinate(x, number_start_y)] = int(number_str)
                     number_str = None
 
     return symbols, numbers
@@ -56,9 +56,9 @@ def part1(input_data: str):
     # Sum of all numbers, which have a symbol in their neighbouring coordinates
     return sum(
         number
-        for co, number in numbers.items.items()
+        for co, number in numbers.items()
         if any(
-            neighbour in symbols.items
+            neighbour in symbols
             for neighbour in number_neighbours(co, number)
         )
     )
@@ -72,16 +72,16 @@ def part2(input_data: str):
         co: {
             neighbour_co
             for neighbour_co in number_neighbours(co, number)
-            if symbols.items.get(neighbour_co) == '*'
+            if symbols.get(neighbour_co) == '*'
         }
-        for co, number in numbers.items.items()
+        for co, number in numbers.items()
     }
     # For all gears
-    for symbol_co, symbol in symbols.items.items():
+    for symbol_co, symbol in symbols.items():
         if symbol == '*':
             # The numbers which have this gear in one of their neighbouring coordinates
             adjacent_part_numbers = [
-                numbers.items[part_number_co]
+                numbers[part_number_co]
                 for part_number_co, adjacent_gear_cos in part_number_co_to_adjacent_gear_cos.items()
                 if symbol_co in adjacent_gear_cos
             ]

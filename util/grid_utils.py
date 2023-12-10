@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
+from collections import UserDict
 from enum import Enum
-from typing import Any
 
 
 class Direction(Enum):
@@ -78,8 +78,7 @@ class Coordinate:
         return {direction: self.step(direction) for direction in directions}
 
 
-@dataclasses.dataclass
-class Grid:
+class Grid(UserDict):
     """
     Origin is upper left corner.
 
@@ -89,15 +88,12 @@ class Grid:
     |
     v (x)
     """
-    items: dict[Coordinate, Any] = dataclasses.field(default_factory=dict)
 
     def visualize(self, filler: str = '.'):
-        x_min, x_max = min(co.x for co in self.items), max(co.x for co in self.items)
-        y_min, y_max = min(co.y for co in self.items), max(co.y for co in self.items)
         string = ''
-        for x in range(x_min, x_max + 1):
-            for y in range(y_min, y_max + 1):
-                value = self.items.get(Coordinate(x, y), filler)
+        for x in range(self.min_x, self.max_x + 1):
+            for y in range(self.min_x, self.max_y + 1):
+                value = self.data.get(Coordinate(x, y), filler)
                 if isinstance(value, Enum):
                     value = value.value
                 string += value
@@ -105,9 +101,17 @@ class Grid:
         print(string)
 
     @property
+    def min_x(self) -> int:
+        return min(co.x for co in self.data)
+
+    @property
     def max_x(self) -> int:
-        return max(co.x for co in self.items)
+        return max(co.x for co in self.data)
 
     @property
     def max_y(self) -> int:
-        return max(co.y for co in self.items)
+        return max(co.y for co in self.data)
+
+    @property
+    def min_y(self) -> int:
+        return min(co.y for co in self.data)
