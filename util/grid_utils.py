@@ -90,3 +90,24 @@ class Grid:
     v (x)
     """
     items: dict[Coordinate, Any] = dataclasses.field(default_factory=dict)
+
+    def visualize(self, filler: str = '.'):
+        x_min, x_max = min(co.x for co in self.items), max(co.x for co in self.items)
+        y_min, y_max = min(co.y for co in self.items), max(co.y for co in self.items)
+        string = ''
+        for x in range(x_min, x_max + 1):
+            for y in range(y_min, y_max + 1):
+                value = self.items.get(Coordinate(x, y), filler)
+                if isinstance(value, Enum):
+                    value = value.value
+                string += value
+            string += '\n'
+        print(string)
+
+    @property
+    def max_x(self) -> int:
+        return max(co.x for co in self.items)
+
+    @property
+    def max_y(self) -> int:
+        return max(co.y for co in self.items)
