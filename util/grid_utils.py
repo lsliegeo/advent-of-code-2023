@@ -77,6 +77,10 @@ class Coordinate:
         directions = list(Direction) if diagonal else Direction.orthogonal_directions()
         return {direction: self.step(direction) for direction in directions}
 
+    @staticmethod
+    def manhattan_distance(co_1: Coordinate, co_2: Coordinate) -> int:
+        return abs(co_1.x - co_2.x) + abs(co_1.y - co_2.y)
+
 
 class Grid(UserDict):
     """
