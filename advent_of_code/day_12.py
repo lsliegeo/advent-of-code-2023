@@ -11,27 +11,27 @@ EXAMPLE = """???.### 1,1,3
 ?###???????? 3,2,1"""
 
 
+@functools.cache
+def get_num_matches(line: str, groups: tuple[int]) -> int:
+    line = re.sub('^\.*', '', line)
+    if not groups:
+        return '#' not in line
+    if not line:
+        return 0
+
+    s = 0
+    if re.match(f'[?#]{{{groups[0]}}}[?.]', line):
+        s += get_num_matches(line[groups[0] + 1:], groups[1:])
+    if line[0] == '?':
+        s += get_num_matches(line[1:], groups)
+    return s
+
+
 def get_number_arrangements(line: str, groups: list[int], unfold: bool = False) -> int:
     if unfold:
         line = '?'.join(line for _ in range(5))
         groups *= 5
-
-    group_index_to_compiled_regex = {group_index: re.compile('[.?]+'.join(f'[#?]{{{g}}}' for g in groups[group_index:]) + '[^#]*$') for group_index in range(len(groups))}
-
-    @functools.cache
-    def get_num_matches(line_index: int, group_index: int) -> int:
-        if group_index >= len(groups):
-            return 1
-
-        s = 0
-        for i, char in enumerate(line[line_index:]):
-            if group_index_to_compiled_regex[group_index].match(line[line_index + i:]):
-                s += get_num_matches(line_index + groups[group_index] + i + 1, group_index + 1)
-            if char == '#':
-                break
-        return s
-
-    return get_num_matches(0, 0)
+    return get_num_matches(line + '.', tuple(groups))
 
 
 def part1(input_data: str):
@@ -50,6 +50,7 @@ if __name__ == '__main__':
     assert get_number_arrangements('?#?#?#?#?#?#?#?', [1, 3, 1, 6]) == 1
     assert get_number_arrangements('????.#...#...', [4, 1, 1]) == 1
     assert get_number_arrangements('????.######..#####.', [1, 6, 5]) == 4
+    assert get_number_arrangements('???????', [2, 1]) == 10
     assert get_number_arrangements('?###????????', [3, 2, 1]) == 10
     assert part1(EXAMPLE) == 21
     assert get_number_arrangements('?????.???', [3, 2]) == 6
