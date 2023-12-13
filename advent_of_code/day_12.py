@@ -1,3 +1,6 @@
+import functools
+import re
+
 from util.input_util import get_input
 
 EXAMPLE = """???.### 1,1,3
@@ -8,41 +11,27 @@ EXAMPLE = """???.### 1,1,3
 ?###???????? 3,2,1"""
 
 
-def get_number_arrangements(line: str, groups: list[int]) -> int:
-    result = []
-    branch_and_bound(line, groups, 0, 0, '', result)
-    return len(set(result))
+def get_number_arrangements(line: str, groups: list[int], unfold: bool = False) -> int:
+    if unfold:
+        line = '?'.join(line for _ in range(5))
+        groups *= 5
 
+    group_index_to_compiled_regex = {group_index: re.compile('[.?]+'.join(f'[#?]{{{g}}}' for g in groups[group_index:]) + '[^#]*$') for group_index in range(len(groups))}
 
-def branch_and_bound(line: str, groups: list[int], index: int, current_group_length: int, current_str: str, result: list[str]):
-    if index >= len(line):
-        if not groups or groups == [current_group_length]:
-            result.append(current_str)
-        return
+    @functools.cache
+    def get_num_matches(line_index: int, group_index: int) -> int:
+        if group_index >= len(groups):
+            return 1
 
-    need_to_finish_group = groups and current_group_length == groups[0]
-    need_to_continue_group = groups and 0 < current_group_length < groups[0]
+        s = 0
+        for i, char in enumerate(line[line_index:]):
+            if group_index_to_compiled_regex[group_index].match(line[line_index + i:]):
+                s += get_num_matches(line_index + groups[group_index] + i + 1, group_index + 1)
+            if char == '#':
+                break
+        return s
 
-    if need_to_finish_group:
-        if line[index] == '#':
-            return
-        branch_and_bound(line, groups[1:], index + 1, 0, current_str + '.', result)
-
-    elif need_to_continue_group:
-        if line[index] == '.':
-            return
-        else:
-            branch_and_bound(line, groups, index + 1, current_group_length + 1, current_str + '#', result)
-
-    else:
-        if groups:
-            if line[index] != '.':
-                branch_and_bound(line, groups, index + 1, 1, current_str + '#', result)
-            if line[index] != '#':
-                branch_and_bound(line, groups, index + 1, 0, current_str + '.', result)
-        else:
-            if line[index] != '#':
-                branch_and_bound(line, groups, index + 1, 0, current_str + '.', result)
+    return get_num_matches(0, 0)
 
 
 def part1(input_data: str):
@@ -51,7 +40,8 @@ def part1(input_data: str):
 
 
 def part2(input_data: str):
-    pass
+    lines = [(line.split()[0], list(map(int, line.split()[1].split(',')))) for line in input_data.splitlines()]
+    return sum(get_number_arrangements(*line, unfold=True) for line in lines)
 
 
 if __name__ == '__main__':
@@ -62,7 +52,16 @@ if __name__ == '__main__':
     assert get_number_arrangements('????.######..#####.', [1, 6, 5]) == 4
     assert get_number_arrangements('?###????????', [3, 2, 1]) == 10
     assert part1(EXAMPLE) == 21
+    assert get_number_arrangements('?????.???', [3, 2]) == 6
+    assert get_number_arrangements('.#?#???????.????#', [1, 2, 3, 2, 1]) == 6
+    assert part1(get_input()) == 7090
     print(f'Solution for part 1 is: {part1(get_input())}')
 
-    assert part2(EXAMPLE) == None
+    assert get_number_arrangements('???.###', [1, 1, 3], unfold=True) == 1
+    assert get_number_arrangements('.??..??...?##.', [1, 1, 3], unfold=True) == 16384
+    assert get_number_arrangements('?#?#?#?#?#?#?#?', [1, 3, 1, 6], unfold=True) == 1
+    assert get_number_arrangements('????.#...#...', [4, 1, 1], unfold=True) == 16
+    assert get_number_arrangements('????.######..#####.', [1, 6, 5], unfold=True) == 2500
+    assert get_number_arrangements('?###????????', [3, 2, 1], unfold=True) == 506250
+    assert part2(EXAMPLE) == 525152
     print(f'Solution for part 2 is: {part2(get_input())}')
