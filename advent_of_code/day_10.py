@@ -1,6 +1,6 @@
 import re
 
-from util.grid_utils import Coordinate, Direction, Grid
+from util.grid_utils import Coordinate, DictGrid, Direction
 from util.input_util import get_input
 
 EXAMPLE = """.....
@@ -67,13 +67,13 @@ CHAR_TO_DIRECTIONS: dict[str, tuple[Direction, Direction]] = {
 }
 
 
-def coordinate_to_two_neighbours(grid: Grid, coordinate: Coordinate) -> tuple[Coordinate, Coordinate]:
+def coordinate_to_two_neighbours(grid: DictGrid, coordinate: Coordinate) -> tuple[Coordinate, Coordinate]:
     a, b = CHAR_TO_DIRECTIONS[grid[coordinate]]
     return coordinate.step(a), coordinate.step(b)
 
 
-def parse_grid(input_data: str) -> tuple[Grid, Coordinate]:
-    grid = Grid()
+def parse_grid(input_data: str) -> tuple[DictGrid, Coordinate]:
+    grid = DictGrid()
     start = None
     for x, line in enumerate(input_data.splitlines()):
         for y, char in enumerate(line):
@@ -98,7 +98,7 @@ def parse_grid(input_data: str) -> tuple[Grid, Coordinate]:
     return grid, start
 
 
-def get_border(grid: Grid, start: Coordinate) -> set[Coordinate]:
+def get_border(grid: DictGrid, start: Coordinate) -> set[Coordinate]:
     previous = None
     current = start
     border_positions = set()

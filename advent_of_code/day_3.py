@@ -1,4 +1,4 @@
-from util.grid_utils import Coordinate, Direction, Grid
+from util.grid_utils import Coordinate, DictGrid, Direction
 from util.input_util import get_input
 
 EXAMPLE = """467..114..
@@ -13,14 +13,14 @@ EXAMPLE = """467..114..
 .664.598.."""
 
 
-def parse_grid(grid_str: str) -> tuple[Grid, Grid]:
+def parse_grid(grid_str: str) -> tuple[DictGrid, DictGrid]:
     # Could also be combined in a single grid, but then we'd have to look inside whether it's an int or a string
-    symbols = Grid()
+    symbols = DictGrid()
     for x, line in enumerate(grid_str.splitlines()):
         for y, char in enumerate(line):
             if char != '.' and not char.isdigit():
                 symbols[Coordinate(x, y)] = char
-    numbers = Grid()
+    numbers = DictGrid()
 
     for x, line in enumerate(grid_str.splitlines()):
         number_str = None

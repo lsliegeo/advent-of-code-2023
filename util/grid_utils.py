@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import abc
 import dataclasses
-from collections import UserDict
+from collections import UserDict, UserList
 from enum import Enum
 
 
@@ -36,6 +37,22 @@ class Direction(Enum):
             Direction.NORTH_WEST: Direction.SOUTH_EAST,
             Direction.SOUTH_EAST: Direction.NORTH_WEST,
         }[direction]
+
+    @staticmethod
+    def rotate(direction: Direction, left: bool) -> Direction:
+        mapping = {
+            Direction.NORTH: Direction.EAST,
+            Direction.SOUTH: Direction.WEST,
+            Direction.WEST: Direction.NORTH,
+            Direction.EAST: Direction.SOUTH,
+            Direction.NORTH_EAST: Direction.SOUTH_EAST,
+            Direction.SOUTH_WEST: Direction.NORTH_WEST,
+            Direction.NORTH_WEST: Direction.NORTH_EAST,
+            Direction.SOUTH_EAST: Direction.SOUTH_WEST,
+        }
+        if left:
+            mapping = {v: k for k, v in mapping.items()}
+        return mapping[direction]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -82,7 +99,36 @@ class Coordinate:
         return abs(co_1.x - co_2.x) + abs(co_1.y - co_2.y)
 
 
-class Grid(UserDict):
+class Grid(abc.ABC):
+
+    def visualize(self):
+        raise NotImplementedError()
+
+    @property
+    @abc.abstractmethod
+    def min_x(self) -> int:
+        raise NotImplementedError()
+
+    @property
+    @abc.abstractmethod
+    def max_x(self) -> int:
+        raise NotImplementedError()
+
+    @property
+    @abc.abstractmethod
+    def min_y(self) -> int:
+        raise NotImplementedError()
+
+    @property
+    @abc.abstractmethod
+    def max_y(self) -> int:
+        raise NotImplementedError()
+
+    def is_in_bounds(self, co: Coordinate) -> bool:
+        return self.min_x <= co.x <= self.max_x and self.min_y <= co.y <= self.max_y
+
+
+class DictGrid(Grid, UserDict):
     """
     Origin is upper left corner.
 
@@ -119,3 +165,34 @@ class Grid(UserDict):
     @property
     def min_y(self) -> int:
         return min(co.y for co in self.data)
+
+
+class ListGrid(Grid, UserList):
+    """
+    Origin is upper left corner.
+
+    +------->
+    |      (y)
+    |
+    |
+    v (x)
+    """
+
+    def visualize(self):
+        pass
+
+    @property
+    def min_x(self) -> int:
+        return 0
+
+    @property
+    def max_x(self) -> int:
+        return len(self.data) - 1
+
+    @property
+    def min_y(self) -> int:
+        return 0
+
+    @property
+    def max_y(self) -> int:
+        return len(self.data[0]) - 1
