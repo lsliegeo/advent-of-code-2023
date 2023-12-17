@@ -26,22 +26,6 @@ EXAMPLE2 = """111111111111
 
 
 def explore(input_data: str, first_turn_index: int, last_turn_index: int) -> int:
-    # heatgrid[x][y] = h
-    # Coordinate (x, y) has heat h
-    heat_grid: ListGrid[list[int]] = ListGrid()
-
-    # distance_grid[x][y][d] = h
-    # It takes h head in order to start from (0, 0) and arrive in (x, y) with direction
-    distance_grid: ListGrid[list[dict[Direction, int]]] = ListGrid()
-
-    for line in input_data.splitlines():
-        heat_grid.append(list(map(int, list(line))))
-        distance_grid.append([{d: math.inf for d in Direction.orthogonal_directions()} for _ in line])
-
-    distance_grid[0][0][Direction.EAST] = 0
-    distance_grid[0][0][Direction.SOUTH] = 0
-    to_explore: set[tuple[Coordinate, Direction]] = {(Coordinate(0, 0), Direction.EAST), (Coordinate(0, 0), Direction.WEST)}
-
     """
     Pseudocode:
 
@@ -54,6 +38,22 @@ def explore(input_data: str, first_turn_index: int, last_turn_index: int) -> int
                 store the new heat value to arrive in this turning point
                 add that turning point to the locations we need to explore
     """
+
+    # heatgrid[x][y] = h
+    # Coordinate (x, y) has heat h
+    heat_grid: ListGrid[list[int]] = ListGrid()
+
+    # distance_grid[x][y][d] = h
+    # It takes h heat in order to start from (0, 0) and arrive in (x, y) with direction d
+    distance_grid: ListGrid[list[dict[Direction, int]]] = ListGrid()
+
+    for line in input_data.splitlines():
+        heat_grid.append(list(map(int, list(line))))
+        distance_grid.append([{d: math.inf for d in Direction.orthogonal_directions()} for _ in line])
+
+    distance_grid[0][0][Direction.EAST] = 0
+    distance_grid[0][0][Direction.SOUTH] = 0
+    to_explore: set[tuple[Coordinate, Direction]] = {(Coordinate(0, 0), Direction.EAST), (Coordinate(0, 0), Direction.WEST)}
 
     while to_explore:
         # We simply store all positions to explore in a set
