@@ -101,9 +101,6 @@ class Coordinate:
 
 class Grid(abc.ABC):
 
-    def visualize(self):
-        raise NotImplementedError()
-
     @property
     @abc.abstractmethod
     def min_x(self) -> int:
@@ -127,6 +124,13 @@ class Grid(abc.ABC):
     def is_in_bounds(self, co: Coordinate) -> bool:
         return self.min_x <= co.x <= self.max_x and self.min_y <= co.y <= self.max_y
 
+    def to_string(self, filler: str = '.') -> list[str]:
+        raise NotImplementedError()
+
+    def visualize(self, filler: str = '.'):
+        print('\n'.join(self.to_string(filler)))
+        print()
+
 
 class DictGrid(Grid, UserDict):
     """
@@ -139,16 +143,16 @@ class DictGrid(Grid, UserDict):
     v (x)
     """
 
-    def visualize(self, filler: str = '.'):
-        string = ''
+    def to_string(self, filler: str = '.') -> list[str]:
+        lines = []
         for x in range(self.min_x, self.max_x + 1):
+            lines.append('')
             for y in range(self.min_x, self.max_y + 1):
                 value = self.data.get(Coordinate(x, y), filler)
                 if isinstance(value, Enum):
                     value = value.value
-                string += value
-            string += '\n'
-        print(string)
+                lines[-1] += value
+        return lines
 
     @property
     def min_x(self) -> int:
@@ -178,8 +182,8 @@ class ListGrid(Grid, UserList):
     v (x)
     """
 
-    def visualize(self):
-        pass
+    def to_string(self, filler: str = '.') -> list[str]:
+        return [''.join(value.value if isinstance(value, Enum) else value for value in line) for line in self.data]
 
     @property
     def min_x(self) -> int:
