@@ -111,6 +111,3 @@ def part2(input_data: str):
 if __name__ == '__main__':
     assert part1(EXAMPLE) == 19114
     print(f'Solution for part 1 is: {part1(get_input())}')
-
-    assert part2(EXAMPLE) == None
-    print(f'Solution for part 2 is: {part2(get_input())}')
