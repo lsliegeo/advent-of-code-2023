@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import dataclasses
+import math
 
 from util.input_util import get_input
 
@@ -103,13 +104,40 @@ def part1(input_data: str):
 
 
 def part2(input_data: str):
-    pass
+    modules: dict[str, Module] = {m.name: m for line in input_data.splitlines() if (m := Module.from_string(line))}
+    modules['button'] = Broadcast('button', ['broadcaster'])
+    cycles = 0
+
+    for m in modules.values():
+        if isinstance(m, Conjunction):
+            for n in modules.values():
+                if m.name in n.destinations:
+                    m.states[n.name] = False
+
+    required_keys = list(modules['qb'].states)
+    key_to_first_negative_occurrence = {}
+
+    while 1:
+        cycles += 1
+        signals = [('button', '', False)]
+        while signals:
+            name, prev_name, prev_signal = signals.pop(0)
+            if name not in modules:
+                continue
+            module = modules[name]
+            next_signal = module.handle(modules, prev_name, prev_signal)
+            if next_signal is None:
+                continue
+            for destination in module.destinations:
+                signals.append((destination, name, next_signal))
+                if destination in required_keys and not next_signal:
+                    key_to_first_negative_occurrence[destination] = cycles
+                    if len(required_keys) == len(key_to_first_negative_occurrence):
+                        return math.lcm(*key_to_first_negative_occurrence.values())
 
 
 if __name__ == '__main__':
     assert part1(EXAMPLE) == 32000000
     assert part1(EXAMPLE2) == 11687500
     print(f'Solution for part 1 is: {part1(get_input())}')
-
-    assert part2(EXAMPLE) == None
     print(f'Solution for part 2 is: {part2(get_input())}')
