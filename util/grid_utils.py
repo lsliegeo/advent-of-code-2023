@@ -72,7 +72,7 @@ class Coordinate:
     def __repr__(self) -> str:
         return f'({self.x}, {self.y})'
 
-    def step(self, direction: Direction):
+    def step(self, direction: Direction, amount: int = 1):
         assert isinstance(direction, Direction)
         match direction:
             case Direction.NORTH | Direction.NORTH_EAST | Direction.NORTH_WEST:
@@ -88,7 +88,7 @@ class Coordinate:
                 y_diff = -1
             case _:
                 y_diff = 0
-        return Coordinate(self.x + x_diff, self.y + y_diff)
+        return Coordinate(self.x + x_diff * amount, self.y + y_diff * amount)
 
     def neighbours(self, diagonal: bool) -> dict[Direction, Coordinate]:
         directions = list(Direction) if diagonal else Direction.orthogonal_directions()
